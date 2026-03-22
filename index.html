@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vercel + Neon Deployment Guide</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e2e8f0; line-height: 1.7; }
+  .hero { background: linear-gradient(135deg, #7c3aed, #4f46e5); padding: 60px 20px; text-align: center; }
+  .hero h1 { font-size: 2.2rem; color: white; margin-bottom: 10px; }
+  .hero p { color: #c4b5fd; font-size: 1.1rem; }
+  .badges { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+  .badge { background: rgba(255,255,255,0.15); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.3); }
+  .container { max-width: 860px; margin: 0 auto; padding: 40px 20px; }
+  .toc { background: #1e1b4b; border: 1px solid #3730a3; border-radius: 12px; padding: 24px; margin-bottom: 40px; }
+  .toc h2 { color: #a78bfa; margin-bottom: 14px; font-size: 1.1rem; }
+  .toc a { color: #c4b5fd; text-decoration: none; display: block; padding: 4px 0; font-size: 0.95rem; }
+  .toc a:hover { color: white; }
+  .section { margin-bottom: 48px; }
+  h2.sec-title { font-size: 1.4rem; color: #a78bfa; border-bottom: 2px solid #4c1d95; padding-bottom: 10px; margin-bottom: 20px; }
+  h3 { font-size: 1.1rem; color: #ddd6fe; margin: 20px 0 10px; }
+  p { color: #cbd5e1; margin-bottom: 12px; }
+  pre { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 16px; overflow-x: auto; margin: 12px 0; }
+  code { font-family: 'Courier New', monospace; font-size: 0.88rem; color: #e2e8f0; }
+  .inline-code { background: #1e293b; color: #a78bfa; padding: 2px 7px; border-radius: 4px; font-family: monospace; font-size: 0.88rem; }
+  .note { background: #1e3a5f; border-left: 4px solid #3b82f6; border-radius: 6px; padding: 12px 16px; margin: 12px 0; color: #93c5fd; font-size: 0.95rem; }
+  .warning { background: #2d1f00; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 12px 16px; margin: 12px 0; color: #fcd34d; font-size: 0.95rem; }
+  .success { background: #052e16; border-left: 4px solid #22c55e; border-radius: 6px; padding: 12px 16px; margin: 12px 0; color: #86efac; font-size: 0.95rem; }
+  .step { display: flex; align-items: flex-start; gap: 14px; margin: 16px 0; }
+  .step-num { background: #7c3aed; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; flex-shrink: 0; margin-top: 2px; }
+  .step-content { flex: 1; }
+  .step-content h4 { color: #ddd6fe; margin-bottom: 6px; font-size: 1rem; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th { background: #4c1d95; color: white; padding: 10px 14px; text-align: left; font-size: 0.9rem; }
+  td { padding: 10px 14px; border-bottom: 1px solid #1e293b; color: #cbd5e1; font-size: 0.9rem; }
+  tr:nth-child(even) td { background: #0f172a; }
+  ul { padding-left: 20px; }
+  li { color: #cbd5e1; margin-bottom: 6px; }
+  .checklist li { list-style: none; padding-left: 0; }
+  .error-badge { background: #450a0a; color: #fca5a5; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 0.82rem; }
+  footer { text-align: center; padding: 30px; color: #475569; border-top: 1px solid #1e293b; margin-top: 40px; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <h1>🚀 Vercel + Neon Deployment Guide</h1>
+  <p>Express + TypeScript + Prisma v7 — সম্পূর্ণ বাংলা ডকুমেন্টেশন</p>
+  <div class="badges">
+    <span class="badge">GitHub</span>
+    <span class="badge">Vercel</span>
+    <span class="badge">Neon DB</span>
+    <span class="badge">Prisma v7</span>
+    <span class="badge">TypeScript</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- TOC -->
+  <div class="toc">
+    <h2>📋 সূচিপত্র</h2>
+    <a href="#s1">১. প্রজেক্ট ওভারভিউ</a>
+    <a href="#s2">২. ফোল্ডার স্ট্রাকচার</a>
+    <a href="#s3">৩. package.json কনফিগারেশন</a>
+    <a href="#s4">৪. tsconfig.json কনফিগারেশন</a>
+    <a href="#s5">৫. prisma.config.ts কনফিগারেশন</a>
+    <a href="#s6">৬. src/config/prisma.ts</a>
+    <a href="#s7">৭. vercel.json কনফিগারেশন</a>
+    <a href="#s8">৮. Environment Variables</a>
+    <a href="#s9">৯. GitHub সেটআপ (দুইটা Account)</a>
+    <a href="#s10">১০. Neon Database সেটআপ</a>
+    <a href="#s11">১১. Vercel Deploy</a>
+    <a href="#s12">১২. Deploy চেকলিস্ট</a>
+    <a href="#s13">১৩. দ্রুত কমান্ড রেফারেন্স</a>
+  </div>
+
+  <!-- Section 1 -->
+  <div class="section" id="s1">
+    <h2 class="sec-title">১. প্রজেক্ট ওভারভিউ</h2>
+    <p>এই গাইডটি একটি Express + TypeScript + Prisma backend প্রজেক্ট GitHub থেকে Vercel এ deploy করার সম্পূর্ণ প্রক্রিয়া বাংলায় ব্যাখ্যা করে। Neon PostgreSQL database ব্যবহার করা হয়েছে।</p>
+    <h3>প্রযুক্তি স্ট্যাক</h3>
+    <table>
+      <tr><th>প্রযুক্তি</th><th>কাজ</th><th>সংস্করণ</th></tr>
+      <tr><td>Express.js</td><td>HTTP Server</td><td>^5.x</td></tr>
+      <tr><td>TypeScript</td><td>Type Safety</td><td>^5.x</td></tr>
+      <tr><td>Prisma</td><td>ORM (Database)</td><td>^7.x</td></tr>
+      <tr><td>Neon</td><td>PostgreSQL (Cloud)</td><td>Free Tier</td></tr>
+      <tr><td>Vercel</td><td>Serverless Deploy</td><td>Free Tier</td></tr>
+      <tr><td>JWT</td><td>Authentication</td><td>^9.x</td></tr>
+    </table>
+  </div>
+
+  <!-- Section 2 -->
+  <div class="section" id="s2">
+    <h2 class="sec-title">২. ফোল্ডার স্ট্রাকচার</h2>
+    <p>Vercel এ deploy করতে হলে নিচের ফোল্ডার স্ট্রাকচার অনুসরণ করুন:</p>
+    <pre><code>my-backend/
+├── api/
+│   └── index.ts          ← Vercel এর entry point
+├── prisma/
+│   ├── schema.prisma     ← Database schema
+│   └── migrations/       ← Migration files
+├── src/
+│   ├── config/
+│   │   ├── env.ts
+│   │   └── prisma.ts     ← Prisma client
+│   ├── generated/
+│   │   └── prisma/       ← Generated client (git এ রাখুন!)
+│   ├── middlewares/
+│   ├── modules/
+│   └── utils/
+├── .env                  ← Local env (gitignore)
+├── .gitignore
+├── package.json
+├── prisma.config.ts      ← Prisma v7 config
+├── tsconfig.json
+└── vercel.json           ← Vercel config</code></pre>
+    <div class="warning">⚠️ <strong>সতর্কতা:</strong> <code>src/generated/</code> ফোল্ডারটি .gitignore এ যোগ করবেন না! GitHub এ push করতে হবে।</div>
+  </div>
+
+  <!-- Section 3 -->
+  <div class="section" id="s3">
+    <h2 class="sec-title">৩. package.json কনফিগারেশন</h2>
+    <div class="warning">⚠️ <strong>সতর্কতা:</strong> <span class="inline-code">"type": "module"</span> কখনো যোগ করবেন না! Vercel serverless এ CommonJS এর সাথে conflict করে।</div>
+    <h3>সঠিক package.json:</h3>
+    <pre><code>{
+  "name": "my-backend",
+  "version": "1.0.0",
+  // ❌ "type": "module"  — এটা দেবেন না!
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "prisma generate && tsc",
+    "start": "node dist/server.js",
+    "postinstall": "prisma generate"  // ✅ Vercel এ auto-run
+  },
+  "dependencies": {
+    "@prisma/client": "^7.x",
+    "@prisma/adapter-pg": "^7.x",
+    "express": "^5.x",
+    "pg": "^8.x",
+    ...
+  },
+  "devDependencies": {
+    "prisma": "^7.x",
+    "typescript": "^5.x",
+    "ts-node-dev": "^2.x",
+    ...
+  }
+}</code></pre>
+    <h3>গুরুত্বপূর্ণ scripts:</h3>
+    <ul>
+      <li><span class="inline-code">"postinstall": "prisma generate"</span> — Vercel deploy এর সময় auto-run হয়</li>
+      <li><span class="inline-code">"build": "prisma generate && tsc"</span> — build এ prisma generate আগে চলে</li>
+    </ul>
+  </div>
+
+  <!-- Section 4 -->
+  <div class="section" id="s4">
+    <h2 class="sec-title">৪. tsconfig.json কনফিগারেশন</h2>
+    <div class="warning">⚠️ <strong>সতর্কতা:</strong> <span class="inline-code">module: "commonjs"</span> এবং <span class="inline-code">moduleResolution: "node"</span> ব্যবহার করুন। "nodenext" Vercel এ সমস্যা করে।</div>
+    <pre><code>{
+  "compilerOptions": {
+    "rootDir": "./",
+    "outDir": "./dist",
+    "module": "commonjs",        // ✅ commonjs — nodenext নয়
+    "moduleResolution": "node",  // ✅ node — node16/nodenext নয়
+    "target": "esnext",
+    "lib": ["esnext", "dom"],
+    "types": ["node"],
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "exclude": ["node_modules", "dist"],
+  "include": [
+    "src/**/*",
+    "api/**/*",            // ✅ api/ ফোল্ডার include
+    "src/generated/**/*",  // ✅ generated client include
+    "prisma/**/*.ts"       // ✅ prisma.config.ts include
+  ]
+}</code></pre>
+    <h3>সাধারণ ভুল:</h3>
+    <ul>
+      <li>❌ <span class="inline-code">module: "nodenext"</span> — .js extension বাধ্যতামূলক হয়, Vercel এ সমস্যা</li>
+      <li>❌ <span class="inline-code">"type": "module"</span> in package.json — CommonJS conflict</li>
+      <li>✅ <span class="inline-code">module: "commonjs"</span> + <span class="inline-code">moduleResolution: "node"</span> — সবচেয়ে stable</li>
+    </ul>
+  </div>
+
+  <!-- Section 5 -->
+  <div class="section" id="s5">
+    <h2 class="sec-title">৫. prisma.config.ts কনফিগারেশন</h2>
+    <p>Prisma v7 এ <span class="inline-code">datasource</span> এ url দেওয়া যায় না। <span class="inline-code">prisma.config.ts</span> এ দিতে হয়:</p>
+    <pre><code>/// &lt;reference types="node" /&gt;  // ← এটা উপরে দিতে হবে
+import "dotenv/config";
+import { defineConfig } from "prisma/config";
+
+export default defineConfig({
+  schema: "prisma/schema.prisma",
+  migrations: {
+    path: "prisma/migrations",
+  },
+  datasource: {
+    url: process.env["DATABASE_URL"],
+  },
+});</code></pre>
+    <div class="note">💡 <strong>নোট:</strong> <span class="inline-code">/// &lt;reference types="node" /&gt;</span> না দিলে <span class="inline-code">process</span> এ TypeScript error আসে।</div>
+    <h3>schema.prisma — url বাদ দিন:</h3>
+    <pre><code>generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  // ❌ url = env("DATABASE_URL") — Prisma v7 এ এটা দেবেন না
+}</code></pre>
+  </div>
+
+  <!-- Section 6 -->
+  <div class="section" id="s6">
+    <h2 class="sec-title">৬. src/config/prisma.ts</h2>
+    <p>Prisma v7 এ <span class="inline-code">PrismaClient</span> এ adapter দিতে হয়। adapter ছাড়া <span class="inline-code">PrismaClient()</span> কাজ করে না:</p>
+    <pre><code>import { PrismaClient } from "../generated/prisma/client.js";
+import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
+
+// DATABASE_URL দিয়ে connection pool তৈরি
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
+const adapter = new PrismaPg(pool as any);
+
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    adapter,  // adapter দেওয়া বাধ্যতামূলক
+  });
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}</code></pre>
+    <div class="note">💡 <strong>নোট:</strong> globalForPrisma pattern hot-reload এ duplicate connection prevent করে।</div>
+  </div>
+
+  <!-- Section 7 -->
+  <div class="section" id="s7">
+    <h2 class="sec-title">৭. vercel.json কনফিগারেশন</h2>
+    <p>Backend root এ <span class="inline-code">vercel.json</span> বানান:</p>
+    <pre><code>{
+  "version": 2,
+  "buildCommand": "prisma generate && tsc",
+  "builds": [
+    {
+      "src": "api/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.ts"
+    }
+  ]
+}</code></pre>
+    <h3>api/index.ts — Vercel entry point:</h3>
+    <pre><code>import app from "../src/app";
+export default app;</code></pre>
+    <div class="success">✅ <strong>গুরুত্বপূর্ণ:</strong> "buildCommand" এ prisma generate দিলে Vercel build এর সময় client generate হয়।</div>
+  </div>
+
+  <!-- Section 8 -->
+  <div class="section" id="s8">
+    <h2 class="sec-title">৮. Environment Variables</h2>
+    <h3>Local .env ফাইল:</h3>
+    <pre><code>DATABASE_URL="postgresql://user:pass@ep-xxx-pooler.neon.tech/neondb?sslmode=require"
+DIRECT_URL="postgresql://user:pass@ep-xxx.neon.tech/neondb?sslmode=require"
+JWT_SECRET="your_super_secret_key_here"
+JWT_EXPIRES_IN="15m"
+NODE_ENV="development"
+PORT=5000</code></pre>
+    <h3>DATABASE_URL vs DIRECT_URL পার্থক্য:</h3>
+    <table>
+      <tr><th>Variable</th><th>URL Type</th><th>কাজ</th></tr>
+      <tr><td>DATABASE_URL</td><td>...pooler.neon.tech... (pooler)</td><td>Runtime — PrismaClient এ ব্যবহার হয়</td></tr>
+      <tr><td>DIRECT_URL</td><td>...neon.tech... (-pooler ছাড়া)</td><td>Migration এর জন্য — prisma.config.ts এ</td></tr>
+    </table>
+    <div class="note">💡 <strong>নোট:</strong> DIRECT_URL তৈরি করতে DATABASE_URL থেকে শুধু <span class="inline-code">-pooler</span> অংশটা সরিয়ে দিন।</div>
+  </div>
+
+  <!-- Section 9 -->
+  <div class="section" id="s9">
+    <h2 class="sec-title">৯. GitHub সেটআপ (দুইটা Account)</h2>
+    <h3>.gitignore ফাইল:</h3>
+    <pre><code>node_modules/
+dist/
+.env
+*.log
+
+# ✅ src/generated/ gitignore এ রাখবেন না!
+# Prisma generated client GitHub এ push করতে হবে</code></pre>
+
+    <h3>দুইটা Account SSH দিয়ে সেটআপ:</h3>
+
+    <div class="step">
+      <div class="step-num">১</div>
+      <div class="step-content">
+        <h4>SSH Key তৈরি করুন (Git Bash এ)</h4>
+        <pre><code># Account 1
+ssh-keygen -t ed25519 -C "account1@email.com" -f ~/.ssh/id_account1
+
+# Account 2
+ssh-keygen -t ed25519 -C "account2@email.com" -f ~/.ssh/id_account2</code></pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">২</div>
+      <div class="step-content">
+        <h4>~/.ssh/config ফাইল বানান</h4>
+        <pre><code># Account 1
+Host github-account1
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_account1
+
+# Account 2
+Host github-account2
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_account2</code></pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">৩</div>
+      <div class="step-content">
+        <h4>GitHub এ SSH Key যোগ করুন</h4>
+        <p>GitHub → Settings → SSH and GPG keys → New SSH Key → public key paste করুন</p>
+        <pre><code>cat ~/.ssh/id_account1.pub  # Public key দেখুন</code></pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">৪</div>
+      <div class="step-content">
+        <h4>Remote URL সেট করুন</h4>
+        <pre><code>git remote set-url origin git@github-account1:account1/repo-name.git</code></pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">৫</div>
+      <div class="step-content">
+        <h4>Test করুন</h4>
+        <pre><code>ssh -T git@github-account1
+# Output: Hi account1! You've successfully authenticated...</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 10 -->
+  <div class="section" id="s10">
+    <h2 class="sec-title">১০. Neon Database সেটআপ</h2>
+
+    <div class="step">
+      <div class="step-num">১</div>
+      <div class="step-content">
+        <h4>Neon Account তৈরি</h4>
+        <p>neon.tech এ যান → Sign up → New Project → Project name দিন</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">২</div>
+      <div class="step-content">
+        <h4>Connection String নিন</h4>
+        <p>Neon Dashboard → Connection Details → Connection string copy করুন</p>
+        <pre><code># Pooler URL (DATABASE_URL)
+postgresql://user:pass@ep-xxx-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+
+# Direct URL — -pooler সরিয়ে দিন (DIRECT_URL)
+postgresql://user:pass@ep-xxx.ap-southeast-1.aws.neon.tech/neondb?sslmode=require</code></pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">৩</div>
+      <div class="step-content">
+        <h4>Migration Run করুন</h4>
+        <pre><code>npx prisma migrate deploy   # Production migration
+
+# অথবা প্রথমবার হলে
+npx prisma db push</code></pre>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">৪</div>
+      <div class="step-content">
+        <h4>Table চেক করুন</h4>
+        <p>Neon Dashboard → Tables → আপনার table দেখা যাচ্ছে কিনা চেক করুন</p>
+      </div>
+    </div>
+
+    <div class="warning">⚠️ <strong>সতর্কতা:</strong> Migration deploy এর আগে DIRECT_URL .env এ সেট করতে হবে।</div>
+  </div>
+
+  <!-- Section 11 -->
+  <div class="section" id="s11">
+    <h2 class="sec-title">১১. Vercel Deploy</h2>
+
+    <div class="step">
+      <div class="step-num">১</div>
+      <div class="step-content"><h4>Vercel Account তৈরি</h4><p>vercel.com → Sign up with GitHub</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">২</div>
+      <div class="step-content"><h4>New Project তৈরি</h4><p>Vercel → New Project → GitHub repo select করুন</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">৩</div>
+      <div class="step-content">
+        <h4>Root Directory সেট করুন (Monorepo হলে)</h4>
+        <pre><code>Root Directory: my-backend    ← backend folder
+Root Directory: my-frontend   ← frontend (আলাদা project)</code></pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">৪</div>
+      <div class="step-content">
+        <h4>Environment Variables যোগ করুন</h4>
+        <pre><code>DATABASE_URL = postgresql://...pooler.../neondb?sslmode=require
+DIRECT_URL   = postgresql://...neon.tech/neondb?sslmode=require
+JWT_SECRET   = your_super_secret_key
+JWT_EXPIRES_IN = 15m
+NODE_ENV     = production</code></pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">৫</div>
+      <div class="step-content"><h4>Deploy করুন</h4><p>Deploy button click করুন। Build log দেখুন।</p></div>
+    </div>
+
+    <h3>সাধারণ Vercel Error এবং সমাধান:</h3>
+    <table>
+      <tr><th>Error</th><th>সমাধান</th></tr>
+      <tr><td><span class="error-badge">exports is not defined</span></td><td>package.json থেকে "type": "module" সরান</td></tr>
+      <tr><td><span class="error-badge">Cannot find module '../generated'</span></td><td>src/generated/ GitHub এ push করুন</td></tr>
+      <tr><td><span class="error-badge">FUNCTION_INVOCATION_FAILED</span></td><td>Vercel Function logs দেখুন, DATABASE_URL চেক করুন</td></tr>
+      <tr><td><span class="error-badge">TS2307: Cannot find module</span></td><td>tsconfig include এ src/generated/**/* যোগ করুন</td></tr>
+      <tr><td><span class="error-badge">Route not found</span></td><td>Server চলছে! /health endpoint test করুন</td></tr>
+      <tr><td><span class="error-badge">500: INTERNAL_SERVER_ERROR</span></td><td>DATABASE_URL সঠিক আছে কিনা চেক করুন</td></tr>
+    </table>
+  </div>
+
+  <!-- Section 12 -->
+  <div class="section" id="s12">
+    <h2 class="sec-title">১২. Deploy চেকলিস্ট</h2>
+    <h3>GitHub Push এর আগে:</h3>
+    <ul class="checklist">
+      <li>✅ package.json এ "type": "module" নেই</li>
+      <li>✅ tsconfig.json এ module: "commonjs" এবং moduleResolution: "node"</li>
+      <li>✅ .gitignore এ src/generated/ নেই</li>
+      <li>✅ npx prisma generate run করা হয়েছে</li>
+      <li>✅ src/generated/ folder GitHub এ push করা হয়েছে</li>
+      <li>✅ api/index.ts তৈরি করা হয়েছে</li>
+      <li>✅ vercel.json তৈরি করা হয়েছে</li>
+    </ul>
+    <h3>Neon সেটআপ এর আগে:</h3>
+    <ul class="checklist">
+      <li>✅ DATABASE_URL (pooler) নেওয়া হয়েছে</li>
+      <li>✅ DIRECT_URL (-pooler ছাড়া) তৈরি করা হয়েছে</li>
+      <li>✅ npx prisma migrate deploy run করা হয়েছে</li>
+      <li>✅ Neon Dashboard এ table দেখা যাচ্ছে</li>
+    </ul>
+    <h3>Vercel Deploy এর আগে:</h3>
+    <ul class="checklist">
+      <li>✅ সব Environment Variables যোগ করা হয়েছে</li>
+      <li>✅ Root Directory সঠিকভাবে সেট করা হয়েছে</li>
+      <li>✅ CORS এ Vercel frontend URL যোগ করা হয়েছে</li>
+    </ul>
+    <h3>Deploy এর পরে:</h3>
+    <ul class="checklist">
+      <li>✅ /health endpoint কাজ করছে</li>
+      <li>✅ /api/auth/register POST request কাজ করছে</li>
+      <li>✅ Neon Dashboard এ নতুন user দেখা যাচ্ছে</li>
+    </ul>
+    <div class="warning">⚠️ <strong>সতর্কতা:</strong> যেকোনো .env পরিবর্তনের পরে Vercel এ Redeploy করতে হবে।</div>
+  </div>
+
+  <!-- Section 13 -->
+  <div class="section" id="s13">
+    <h2 class="sec-title">১৩. দ্রুত কমান্ড রেফারেন্স</h2>
+    <h3>প্রতিদিনের কাজে:</h3>
+    <pre><code># Development server start
+npm run dev
+
+# Prisma client generate
+npx prisma generate
+
+# New migration তৈরি
+npx prisma migrate dev --name migration_name
+
+# Production migration deploy
+npx prisma migrate deploy
+
+# Database schema push (migration ছাড়া)
+npx prisma db push
+
+# Prisma Studio (Database GUI)
+npx prisma studio</code></pre>
+
+    <h3>GitHub Push:</h3>
+    <pre><code>git add .
+git commit -m "your commit message"
+git push -u origin main</code></pre>
+
+    <h3>Build Test Local এ:</h3>
+    <pre><code># Build করুন
+npm run build
+
+# Build output চেক করুন
+ls dist/
+
+# Production mode এ run করুন
+npm start</code></pre>
+  </div>
+
+</div>
+
+<footer>
+  © 2026 — Express + TypeScript + Prisma + Vercel Deployment Guide | সম্পূর্ণ বাংলা ডকুমেন্টেশন
+</footer>
+
+</body>
+</html>
